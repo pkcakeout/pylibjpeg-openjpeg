@@ -15,7 +15,7 @@ endif()
 #string(TOLOWER ${OPENJPEG_NAMESPACE} OPENJPEG_LIBRARY_NAME)
 set(OPENJPEG_LIBRARY_NAME openjp2)
 
-project(${OPENJPEG_NAMESPACE})
+project(${OPENJPEG_NAMESPACE} C)
 
 # Do full dependency headers.
 include_regular_expression("^.*$")
@@ -23,8 +23,8 @@ include_regular_expression("^.*$")
 #-----------------------------------------------------------------------------
 # OPENJPEG version number, useful for packaging and doxygen doc:
 set(OPENJPEG_VERSION_MAJOR 2)
-set(OPENJPEG_VERSION_MINOR 3)
-set(OPENJPEG_VERSION_BUILD 1)
+set(OPENJPEG_VERSION_MINOR 5)
+set(OPENJPEG_VERSION_BUILD 0)
 set(OPENJPEG_VERSION
   "${OPENJPEG_VERSION_MAJOR}.${OPENJPEG_VERSION_MINOR}.${OPENJPEG_VERSION_BUILD}")
 set(PACKAGE_VERSION
@@ -36,7 +36,40 @@ endif(NOT OPENJPEG_SOVERSION)
 set(OPENJPEG_LIBRARY_PROPERTIES
   VERSION   "${OPENJPEG_VERSION_MAJOR}.${OPENJPEG_VERSION_MINOR}.${OPENJPEG_VERSION_BUILD}"
   SOVERSION "${OPENJPEG_SOVERSION}"
- )
+)
+
+# --------------------------------------------------------------------------
+# Path to additional CMake modules
+set(CMAKE_MODULE_PATH
+    ${${OPENJPEG_NAMESPACE}_SOURCE_DIR}/cmake
+    ${CMAKE_MODULE_PATH})
+
+# --------------------------------------------------------------------------
+# On Visual Studio 8 MS deprecated C. This removes all 1.276E1265 security
+# warnings
+if(WIN32)
+  if(NOT BORLAND)
+    if(NOT CYGWIN)
+      if(NOT MINGW)
+        if(NOT ITK_ENABLE_VISUAL_STUDIO_DEPRECATED_C_WARNINGS)
+          add_definitions(
+            -D_CRT_FAR_MAPPINGS_NO_DEPRECATE
+            -D_CRT_IS_WCTYPE_NO_DEPRECATE
+            -D_CRT_MANAGED_FP_NO_DEPRECATE
+            -D_CRT_NONSTDC_NO_DEPRECATE
+            -D_CRT_SECURE_NO_DEPRECATE
+            -D_CRT_SECURE_NO_DEPRECATE_GLOBALS
+            -D_CRT_SETERRORMODE_BEEP_SLEEP_NO_DEPRECATE
+            -D_CRT_TIME_FUNCTIONS_NO_DEPRECATE
+            -D_CRT_VCCLRIT_NO_DEPRECATE
+            -D_SCL_SECURE_NO_DEPRECATE
+            )
+        endif()
+      endif()
+    endif()
+  endif()
+endif()
+
 
 # --------------------------------------------------------------------------
 # Install directories
@@ -46,22 +79,15 @@ endif()
 
 set(OPENJPEG_INSTALL_PACKAGE_DIR "../interface")
 
-# --------------------------------------------------------------------------
-# Path to additional CMake modules
-set(CMAKE_MODULE_PATH
-    ${${OPENJPEG_NAMESPACE}_SOURCE_DIR}/cmake
-    ${CMAKE_MODULE_PATH})
 
-set(OPENJPEG_INSTALL_INCLUDE_DIR
-    "../interface"
-)
 
-option(BUILD_JPIP "Build the JPIP library and executables." OFF)
 
 #-----------------------------------------------------------------------------
 # Big endian test:
+if (NOT EMSCRIPTEN)
 include (${CMAKE_ROOT}/Modules/TestBigEndian.cmake)
 TEST_BIG_ENDIAN(OPJ_BIG_ENDIAN)
+endif()
 
 
 #-----------------------------------------------------------------------------
@@ -114,12 +140,12 @@ check_symbol_exists(memalign malloc.h OPJ_HAVE_MEMALIGN)
 # opj_config.h generation (2/2)
 configure_file(
  ${CMAKE_CURRENT_SOURCE_DIR}/src/lib/openjp2/opj_config.h.cmake.in
- ../../interface/opj_config.h
+ ${CMAKE_CURRENT_BINARY_DIR}/src/lib/openjp2/opj_config.h
  @ONLY
  )
 
  configure_file(
  ${CMAKE_CURRENT_SOURCE_DIR}/src/lib/openjp2/opj_config_private.h.cmake.in
- ../../interface/opj_config_private.h
+ ${CMAKE_CURRENT_BINARY_DIR}/src/lib/openjp2/opj_config_private.h
  @ONLY
  )

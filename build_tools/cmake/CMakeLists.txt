@@ -79,8 +79,9 @@ endif()
 
 set(OPENJPEG_INSTALL_PACKAGE_DIR "../interface")
 
-
-
+set(OPENJPEG_INSTALL_INCLUDE_DIR
+    "../interface"
+)
 
 #-----------------------------------------------------------------------------
 # Big endian test:
@@ -140,12 +141,12 @@ check_symbol_exists(memalign malloc.h OPJ_HAVE_MEMALIGN)
 # opj_config.h generation (2/2)
 configure_file(
  ${CMAKE_CURRENT_SOURCE_DIR}/src/lib/openjp2/opj_config.h.cmake.in
- ${CMAKE_CURRENT_BINARY_DIR}/src/lib/openjp2/opj_config.h
+ ../../interface/opj_config.h
  @ONLY
  )
 
  configure_file(
  ${CMAKE_CURRENT_SOURCE_DIR}/src/lib/openjp2/opj_config_private.h.cmake.in
- ${CMAKE_CURRENT_BINARY_DIR}/src/lib/openjp2/opj_config_private.h
+ ../../interface/opj_config_private.h
  @ONLY
  )

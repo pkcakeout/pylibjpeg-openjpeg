@@ -83,6 +83,11 @@ set(OPENJPEG_INSTALL_INCLUDE_DIR
     "../interface"
 )
 
+option(BUILD_JPWL off)
+option(BUILD_MJ2 off)
+option(BUILD_JPIP off)
+option(BUILD_JP3D off)
+
 #-----------------------------------------------------------------------------
 # Big endian test:
 if (NOT EMSCRIPTEN)

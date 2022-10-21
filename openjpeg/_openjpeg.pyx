@@ -18,8 +18,8 @@ cdef extern struct JPEG2000Parameters:
     uint32_t nr_tiles
 
 cdef extern char* OpenJpegVersion()
-cdef extern int Decode(void* fp, unsigned char* out, int codec)
-cdef extern int GetParameters(void* fp, int codec, JPEG2000Parameters *param)
+cdef extern int Decode(void* fp, unsigned char* out, int codec) nogil
+cdef extern int GetParameters(void* fp, int codec, JPEG2000Parameters *param) nogil
 
 
 ERRORS = {
@@ -74,7 +74,10 @@ def decode(fp, codec=0):
     arr = np.zeros(nr_bytes, dtype=np.uint8)
     cdef unsigned char *p_out = <unsigned char *>np.PyArray_DATA(arr)
 
-    result = Decode(p_in, p_out, codec)
+    cdef int result
+    cdef int ccodec = codec
+    with nogil:
+        result = Decode(p_in, p_out, ccodec)
     if result != 0:
         try:
             msg = f": {ERRORS[result]}"
@@ -130,7 +133,10 @@ def get_parameters(fp, codec=0):
     cdef PyObject* ptr = <PyObject*>fp
 
     # Decode the data - output is written to output_buffer
-    result = GetParameters(ptr, codec, p_param)
+    cdef int result
+    cdef int ccodec = codec
+    with nogil:
+        result = GetParameters(ptr, ccodec, p_param)
     if result != 0:
         try:
             msg = f": {ERRORS[result]}"
